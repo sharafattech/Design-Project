@@ -64,12 +64,67 @@ class ToDoList extends StatelessWidget {
                     itemCount: docs.length,
                     itemBuilder: (context, index) {
                       var data = docs[index].data();
-                      return Card(
-                        child: Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Text(
-                            '${data['content']}',
-                            style: TextStyle(fontSize: 20),
+                      var note = docs[index];
+                      String docId = note.id;
+                      return InkWell(
+                        onTap: () {
+                          Navigator.push(
+                            context,
+                            MaterialPageRoute(
+                              builder: (context) => NotePage(docId: docId),
+                            ),
+                          );
+                        },
+                        child: Card(
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Expanded(
+                                child: Padding(
+                                  padding: const EdgeInsets.all(8.0),
+                                  child: Text(
+                                    '${data['content']}',
+                                    style: TextStyle(fontSize: 20),
+                                    maxLines: 1,
+                                    overflow: TextOverflow.ellipsis,
+                                  ),
+                                ),
+                              ),
+                              IconButton(
+                                onPressed: () async {
+                                  showDialog(
+                                    context: context,
+                                    builder: (context) {
+                                      return AlertDialog(
+                                        title: Text('Delete doc'),
+                                        content: Text(
+                                          'Are you sure you want to delete this doc?',
+                                        ),
+                                        actions: [
+                                          TextButton(
+                                            onPressed: () {
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text('Cancel'),
+                                          ),
+                                          TextButton(
+                                            onPressed: () {
+                                              FirebaseFirestore.instance
+                                                  .collection('content')
+                                                  .doc(docId)
+                                                  .delete();
+                                              Navigator.pop(context);
+                                            },
+                                            child: Text('Delete'),
+                                          ),
+                                        ],
+                                      );
+                                    },
+                                  );
+                                },
+                                icon: Icon(Icons.delete),
+                              ),
+                            ],
                           ),
                         ),
                       );

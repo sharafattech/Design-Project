@@ -2,7 +2,8 @@ import 'package:flutter/material.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 
 class NotePage extends StatefulWidget {
-  const NotePage({super.key});
+  String? docId;
+  NotePage({super.key, this.docId});
 
   @override
   State<NotePage> createState() => _NotePageState();
@@ -10,6 +11,23 @@ class NotePage extends StatefulWidget {
 
 class _NotePageState extends State<NotePage> {
   final TextEditingController editNoteController = TextEditingController();
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.docId != null) {
+      loadFunc();
+    }
+  }
+
+  void loadFunc() async {
+    DocumentSnapshot doc = await FirebaseFirestore.instance
+        .collection('content')
+        .doc(widget.docId)
+        .get();
+
+    editNoteController.text = doc['content'];
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -80,6 +98,36 @@ class _NotePageState extends State<NotePage> {
       ),
     );
   }
+
+  Future<void> sendDataToFirebase(String data) async {
+    if (data.trim().isEmpty) {
+      print('There is no data to send firebase');
+      return;
+    }
+
+    try {
+      FirebaseFirestore firebaseInstance = FirebaseFirestore.instance;
+
+      if (widget.docId == null) {
+        // CollectionReference collectionReference = firebaseInstance.collection(
+        //   'content',
+        // );
+
+        // Map<String, dynamic> noteData = {'content': data};
+        //  collectionReference.add(noteData);
+        await firebaseInstance.collection('content').add({'content': data});
+      } else {
+        // Map<String, dynamic> noteData = {'content': data};
+        firebaseInstance.collection('content').doc(widget.docId).update({
+          'content': data,
+        });
+      }
+
+      print('Data added to Firebase successfully');
+    } catch (e) {
+      print('Error: Sending data to Firestore Failed');
+    }
+  }
 }
 
 // Future<void> sendDataToFirebase(String noteText) async {
@@ -103,22 +151,25 @@ class _NotePageState extends State<NotePage> {
 //   }
 // }
 
-Future<void> sendDataToFirebase(String data) async {
-  if (data.trim().isEmpty) {
-    print('There is no data to send firebase');
-    return;
-  }
+// Future<void> sendDataToFirebase(String data) async {
+//   if (data.trim().isEmpty) {
+//     print('There is no data to send firebase');
+//     return;
+//   }
 
-  try {
-    FirebaseFirestore firebaseInstance = FirebaseFirestore.instance;
-    CollectionReference collectionReference = firebaseInstance.collection(
-      'content',
-    );
+//   try {
+//     FirebaseFirestore firebaseInstance = FirebaseFirestore.instance;
 
-    Map<String, dynamic> noteData = {'content': data};
-    await collectionReference.add(noteData);
-    print('Data added to Firebase successfully');
-  } catch (e) {
-    print('Error: Sending data to Firestore Failed');
-  }
-}
+//     if (Widget.docId) {}
+//     CollectionReference collectionReference = firebaseInstance.collection(
+//       'content',
+//     );
+
+//     Map<String, dynamic> noteData = {'content': data};
+//     await collectionReference.add(noteData);
+
+//     print('Data added to Firebase successfully');
+//   } catch (e) {
+//     print('Error: Sending data to Firestore Failed');
+//   }
+// }
