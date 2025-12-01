@@ -2,9 +2,15 @@ import 'package:basic_design_project/resturant_model.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
 import 'package:flutter/material.dart';
 
-class ToDoList extends StatelessWidget {
+class ToDoList extends StatefulWidget {
   const ToDoList({super.key});
 
+  @override
+  State<ToDoList> createState() => _ToDoListState();
+}
+
+class _ToDoListState extends State<ToDoList> {
+  String searchQuery = ""; // change
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -33,6 +39,22 @@ class ToDoList extends StatelessWidget {
         padding: const EdgeInsets.all(8.0),
         child: Column(
           children: [
+            TextField(
+              // change
+              decoration: InputDecoration(
+                hintText: "Search notes....",
+                prefixIcon: Icon(Icons.search),
+                border: OutlineInputBorder(
+                  borderRadius: BorderRadius.circular(12),
+                ),
+              ),
+              onChanged: (value) {
+                setState(() {
+                  searchQuery = value.trim().toLowerCase();
+                });
+              },
+            ),
+            SizedBox(height: 20),
             Padding(
               padding: const EdgeInsets.all(8.0),
               child: Text(
@@ -59,12 +81,18 @@ class ToDoList extends StatelessWidget {
                     return Center(child: Text('There is no data'));
                   }
                   var docs = snapshot.data!.docs;
+                  //Filter documents based on search
+                  var filteredDocs = docs.where((doc) {
+                    var data = doc.data();
+                    String content = data['content'].toString().toLowerCase();
+                    return content.contains(searchQuery);
+                  }).toList();
 
                   return ListView.builder(
-                    itemCount: docs.length,
+                    itemCount: filteredDocs.length, // change
                     itemBuilder: (context, index) {
-                      var data = docs[index].data();
-                      var note = docs[index];
+                      var data = filteredDocs[index].data(); // change
+                      var note = filteredDocs[index]; // change
                       String docId = note.id;
                       return InkWell(
                         onTap: () {
