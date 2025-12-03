@@ -2,19 +2,14 @@ import 'package:googleapis_auth/auth_io.dart';
 import 'dart:async';
 import 'dart:convert';
 
-// WARNING: This class is designed to run ONLY on a SECURE BACKEND SERVER.
-// The hardcoded JSON below is a severe security risk if deployed in a mobile app.
 class GetServerKey {
   Future<String> getServerKeyToken() async {
-    // 1. Define the necessary scopes for the required services
     final scopes = [
       'https://www.googleapis.com/auth/userinfo.email',
       'https://www.googleapis.com/auth/firebase.database',
       'https://www.googleapis.com/auth/firebase.messaging',
     ];
 
-    // 2. Service Account Credentials (Replaced with secure placeholder)
-    // NOTE: The JSON structure was fixed by removing the extra outer curly braces.
     const serviceAccountJson = {
       "type": "service_account",
       "project_id": "to-do-list-2c800",
@@ -34,19 +29,16 @@ class GetServerKey {
     };
 
     try {
-      // 3. Authenticate and get the authorized client
       final client = await clientViaServiceAccount(
         ServiceAccountCredentials.fromJson(serviceAccountJson),
         scopes,
       );
 
-      // 4. Extract the short-lived access token
       final accessServerKey = client.credentials.accessToken.data;
-      client.close(); // Close the client after fetching the token
+      client.close();
 
       return accessServerKey;
     } catch (e) {
-      // Handle potential errors during authentication (e.g., invalid key format)
       print("Error generating token: $e");
       return "ERROR: Token generation failed.";
     }
